@@ -1,12 +1,11 @@
-# Observability Platform - Minimal Demo
+# Observability Platform 
 
-This ZIP contains a simple, runnable observability platform for the assignment:
 - `collector-service` - Node.js Express app that receives logs, stores in logs_db, creates incidents in meta_db.
 - `sample-app` - sample microservice that sends tracking logs to collector.
 - `frontend` - minimal Next.js dashboard to view logs and incidents.
 - `docker-compose.yml` - starts two MongoDB instances (logs_db and meta_db).
 
-## Quick start (recommended)
+## Quick start 
 1. Make sure you have Node 18+, npm, and Docker installed.
 2. Start MongoDB containers:
    ```bash
@@ -52,7 +51,7 @@ This ZIP contains a simple, runnable observability platform for the assignment:
   - `GET /api/incidents` - list incidents
   - `POST /api/incidents/:id/resolve` - resolve incident
 
-## How it works (simplified)
+## How it works 
 - sample-app middleware sends log JSON to collector after each request.
 - collector stores logs in `logs_db.api_logs` (Mongo on port 27017).
 - collector creates incidents in `meta_db.incidents` (Mongo on port 27018) for:
@@ -67,8 +66,3 @@ This ZIP contains a simple, runnable observability platform for the assignment:
   - No advanced rate limiter
   - No batching / async queuing
   - Optimistic locking is simulated by Mongoose's versioning when saving incidents.
-- For the assignment, you can extend this to Spring Boot, add JWT auth, rate-limiters, and other features.
-
-Have fun! If you want, I can now:
-- add a Dockerfile to containerize collector & sample-app,
-- or convert collector to Spring Boot Kotlin as originally planned.
