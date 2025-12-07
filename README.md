@@ -60,9 +60,3 @@
   - event === 'rate-limit-hit' -> type `rate-limit`
 - frontend fetches incidents and logs from collector and shows them.
 
-## Notes
-- This is a minimal demo to help you get started quickly. It intentionally keeps things simple:
-  - No authentication
-  - No advanced rate limiter
-  - No batching / async queuing
-  - Optimistic locking is simulated by Mongoose's versioning when saving incidents.
