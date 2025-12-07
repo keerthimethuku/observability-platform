@@ -1,62 +1,68 @@
-# Observability Platform 
+# API Monitoring & Observability Platform
 
-- `collector-service` - Node.js Express app that receives logs, stores in logs_db, creates incidents in meta_db.
-- `sample-app` - sample microservice that sends tracking logs to collector.
-- `frontend` - minimal Next.js dashboard to view logs and incidents.
-- `docker-compose.yml` - starts two MongoDB instances (logs_db and meta_db).
+## Architecture
+The system follows a centralized monitoring design where all microservices send API metrics to a single collector.
 
-## Quick start 
-1. Make sure you have Node 18+, npm, and Docker installed.
-2. Start MongoDB containers:
-   ```bash
-   docker compose up -d
-   ```
-   This starts:
-   - Mongo logs DB on localhost:27017
-   - Mongo meta DB on localhost:27018
+Microservice → Tracking Middleware → Collector Service → Dual MongoDB → Dashboard
 
-3. Start the collector:
-   ```bash
-   cd collector-service
-   npm install
-   npm start
-   ```
-   Collector listens on port 8080 by default.
+- The tracking middleware captures API request details.
+- The collector stores logs, detects issues, and manages incidents.
+- The dashboard visualizes logs and incidents.
 
-4. Start the sample app (generates logs):
-   ```bash
-   cd sample-app
-   npm install
-   npm start
-   ```
-   Sample app on port 4000. Endpoints:
-   - `GET /fast` (fast)
-   - `GET /slow` (slow, ~800ms)
-   - `GET /error` (returns 500)
+---
 
-   Hitting `/slow` and `/error` will generate incidents.
+## Database Schemas
 
-5. Start the frontend:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-   Open http://localhost:3000
+### logs_db (API Logs)
+Used for storing all API request logs.
 
-## Useful API endpoints
-- Collector:
-  - `POST /collect/log` - receives log JSON
-  - `GET /api/logs` - query recent logs
-  - `GET /api/incidents` - list incidents
-  - `POST /api/incidents/:id/resolve` - resolve incident
+{
+  service: "sample-service",
+  endpoint: "/slow",
+  method: "GET",
+  status: 200,
+  latencyMs: 820,
+  timestamp: "..."
+}
 
-## How it works 
-- sample-app middleware sends log JSON to collector after each request.
-- collector stores logs in `logs_db.api_logs` (Mongo on port 27017).
-- collector creates incidents in `meta_db.incidents` (Mongo on port 27018) for:
-  - latency > 500ms -> type `slow`
-  - status >= 500 -> type `broken`
-  - event === 'rate-limit-hit' -> type `rate-limit`
-- frontend fetches incidents and logs from collector and shows them.
+### meta_db (Incidents & Metadata)
+Used for storing detected incidents and resolution status.
+
+{
+  service: "sample-service",
+  endpoint: "/slow",
+  type: "slow",
+  count: 3,
+  resolved: false,
+  __v: 2
+}
+
+---
+
+## Decisions Taken
+- Logs and incidents are stored in separate databases to avoid performance issues.
+- Tracking middleware is lightweight and does not block API requests.
+- Collector service is centralized for easier analysis and monitoring.
+- MongoDB is used for its flexibility and high write throughput.
+
+---
+
+## Dual MongoDB Setup
+Two MongoDB databases are used:
+
+- logs_db stores high-volume API logs.
+- meta_db stores low-volume incident metadata.
+
+This separation ensures logs ingestion does not impact incident management and allows independent scaling.
+
+---
+
+## Rate Limiter
+- Tracks the number of API requests per service per second.
+- If the limit is exceeded, a rate-limit event is generated.
+- Requests are not blocked; only monitoring data is recorded.
+- The collector creates a rate-limit incident for visibility.
+
+
+
 
