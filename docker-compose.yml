@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  mongo_logs:
+    image: mongo:6
+    container_name: mongo_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_logs_data:/data/db
+
+  mongo_meta:
+    image: mongo:6
+    container_name: mongo_meta
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_meta_data:/data/db
+
+volumes:
+  mongo_logs_data:
+  mongo_meta_data:

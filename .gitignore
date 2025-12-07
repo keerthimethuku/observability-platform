@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+npm-debug.log*
+mongo_logs_data/
+mongo_meta_data/
